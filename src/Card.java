@@ -67,4 +67,17 @@ public class Card {
 	public Card clone() {
 		return new Card(this.value, this.suit);
 	}
+	
+	@Override
+	public boolean equals( Object o ) {
+		if ( o instanceof Card ) {
+			Card c = (Card) o; 
+			return (this.suit == c.suit) && (this.value == c.value);
+		}
+		else
+			return false;
+	}
+	
+	
+	
 }

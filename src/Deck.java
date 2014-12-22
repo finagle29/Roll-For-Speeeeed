@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.Iterator;
 
 public class Deck extends ArrayList<Card> {
 	
@@ -51,5 +51,5 @@ public class Deck extends ArrayList<Card> {
 	public void display() {
 		System.out.println(this.toString());
 	}
-	
+
 }
