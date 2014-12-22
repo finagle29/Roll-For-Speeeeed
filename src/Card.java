@@ -61,4 +61,10 @@ public class Card {
 		return this.valueToString() + " of " + this.suitToString();
 	}
 	
+	/**
+	 * deep copy
+	 */
+	public Card clone() {
+		return new Card(this.value, this.suit);
+	}
 }
