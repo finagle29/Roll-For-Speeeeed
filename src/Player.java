@@ -150,6 +150,7 @@ public class Player {
 	}
 	
 	public void takeTurn( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
+		returnState r;
 		System.out.println("Your hand:");
 		hand.display();
 		System.out.println("Attack or Effect (a/e)");
@@ -162,14 +163,18 @@ public class Player {
 		switch (c) {
 		case 'a':
 		case 'A':
-			this.attack( opponent, dice, in, pcdeck, deck, discard );
+			r = this.attack( opponent, dice, in, pcdeck, deck, discard );
 			break;
 		default:
-			this.effect( opponent, in );
+			r = this.effect( opponent, in );
+		}
+		if (r.discardNeeded) {
+			discard.add(hand.get(r.choice));
+			hand.remove(r.choice);
 		}
 	}
 	
-	private void attack( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
+	private returnState attack( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
 		this.hand.shuffle();
 		System.out.println(opponent.name + ", choose a card from " + this.name + "'s hand (1-" + this.hand.size() + ")");
 		int choice = in.nextInt() - 1;
@@ -226,7 +231,7 @@ public class Player {
 				deck.shuffle();
 				hand.fill(deck, 4);
 				opponent.hand.fill(deck, 4);
-				break;
+				return new returnState(choice, false);
 			case Card.SPADES:
 				System.out.print("Rolling d6 to increase speed... ");
 				r1 = dice[0].roll();
@@ -244,6 +249,7 @@ public class Player {
 			if (choyce.equalsIgnoreCase(name)) {
 				Player tempPlayer = new Player(pcdeck, deck, dice, hand, in);
 				this.makeEqualTo(tempPlayer);
+				return new returnState(choice, false);
 			} else {
 				System.out.print("Rolling for hit... ");
 				int roll = dice[0].roll();
@@ -257,7 +263,7 @@ public class Player {
 			}
 			break;
 		}
-		
+		return new returnState(choice, true);
 	}
 	
 	private void damage( int chupa, Player opponent, Die[] dice, Scanner in ) {
@@ -291,8 +297,18 @@ public class Player {
 		}
 	}
 	
-	public void effect( Player opponent, Scanner in ) {
-		
+	private returnState effect( Player opponent, Scanner in ) {
+		return new returnState(0,false); // write code here later
 	}
 
+	private class returnState {
+		int choice;
+		boolean discardNeeded;
+		
+		returnState( int c, boolean d ) {
+			choice = c;
+			discardNeeded = d;
+		}
+		
+	}
 }
