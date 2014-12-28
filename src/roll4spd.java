@@ -10,6 +10,7 @@ public class roll4spd {
 		Scanner in = new Scanner( System.in );
 		Deck deck = new Deck(true);
 		pcDeck pcdeck = new pcDeck();
+		Deck discard = new Deck();
 		deck.removeAll(pcdeck);
 		deck.shuffle();
 		pcdeck.shuffle();
@@ -24,25 +25,23 @@ public class roll4spd {
 		System.out.print( "Enter the name of the other player: " );
 		Player p2 = new Player( in.next(), pcdeck, deck, dice, in );
 		
-		System.out.println("Entering the main game loop...");
 		while ( p1.HP > 0 && p2.HP > 0 ) {
+			// play ball
 			p1.rollForSpeeeeed(dice);
 			p1.display();
 			p2.rollForSpeeeeed(dice);
 			p2.display();
 			if ( p1.speed > p2.speed ) {
-				p1.takeTurn( p2, in );
-				p2.takeTurn( p1, in );
+				p1.takeTurn( p2, dice, in, pcdeck, deck, discard );
+				p2.takeTurn( p1, dice, in, pcdeck, deck, discard );
 			} else if ( p2.speed > p1.speed ) {
-				p2.takeTurn( p1, in );
-				p1.takeTurn( p2, in );
+				p2.takeTurn( p1, dice, in, pcdeck, deck, discard );
+				p1.takeTurn( p2, dice, in, pcdeck, deck, discard );
 			}
 			
 			
 			
 			
-			System.exit(0);
-			// play ball
 		}
 
 	}

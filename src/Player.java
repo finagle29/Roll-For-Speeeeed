@@ -12,6 +12,7 @@ public class Player {
 	public int baseSp = 0;
 	public int turnSp = 0;
 	public int speed = 0;
+	public boolean shielded = false;
 	
 	/**
 	 * This constructor is used for initial setup
@@ -124,6 +125,13 @@ public class Player {
 		}
 	}
 	
+	private void makeEqualTo( Player copy ) {
+		pc = copy.pc.clone();
+		hand = (Hand) copy.hand.clone();
+		maxHP = copy.maxHP;
+		baseSp = copy.baseSp;
+	}
+	
 	public void rollForSpeeeeed( Die[] dice ) {
 		turnSp = 0;
 		System.out.println("Roll for Speeeed!");
@@ -141,7 +149,7 @@ public class Player {
 		System.out.println(this.toString());
 	}
 	
-	public void takeTurn( Player opponent, Scanner in ) {
+	public void takeTurn( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
 		System.out.println("Your hand:");
 		hand.display();
 		System.out.println("Attack or Effect (a/e)");
@@ -154,17 +162,133 @@ public class Player {
 		switch (c) {
 		case 'a':
 		case 'A':
-			this.attack( opponent, in );
+			this.attack( opponent, dice, in, pcdeck, deck, discard );
 			break;
 		default:
 			this.effect( opponent, in );
 		}
 	}
 	
-	public void attack( Player opponent, Scanner in ) {
+	private void attack( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
 		this.hand.shuffle();
-		System.out.println(opponent.name + ", choose a card from " + this.name + "'s hand (1-" + this.hand.size());
+		System.out.println(opponent.name + ", choose a card from " + this.name + "'s hand (1-" + this.hand.size() + ")");
+		int choice = in.nextInt() - 1;
+		while (choice < 0 || choice >= this.hand.size()) {
+			System.out.println("You must choose a valid card index (between 1 and " + this.hand.size() + ")");
+			choice = in.nextInt() - 1;
+		}
+		System.out.println(hand.get(choice).toString());
+		switch (hand.get(choice).value) {
+		case Card.ACE:
+		case 3:
+		case 4:
+		case 5:
+		case 7:
+			damage(hand.get(choice).value, opponent, dice, in);
+			break;
+		case 8:
+		case 9:
+			if (pc.value == Card.JACK)
+				damage(Card.ACE, opponent, dice, in);
+			else
+				damage(hand.get(choice).value, opponent, dice, in);
+			break;
+		case 6:
+			if (pc.value == Card.KING)
+				damage(Card.ACE, opponent, dice, in);
+			else
+				damage(hand.get(choice).value, opponent, dice, in);
+			break;
+		case 2:
+			switch (pc.suit) {
+			case Card.CLUBS:
+				shielded = true;
+				break;
+			case Card.DIAMONDS:
+				System.out.print("Rolling to drain the average of 2d6... ");
+				int r1 = dice[0].roll();
+				int r2 = dice[1].roll();
+				System.out.println(r1 + " " + r2);
+				int drain = (r1 + r2)/2 + (r1 + r2)%2;
+				System.out.println(drain + " was drained!");
+				opponent.HP -= drain;
+				this.HP += drain;
+				break;
+			case Card.HEARTS:
+				for ( Card c : hand ) {
+					deck.add(c);
+					hand.remove(c);
+				}
+				for ( Card c : opponent.hand ) {
+					deck.add(c);
+					opponent.hand.remove(c);
+				}
+				deck.shuffle();
+				hand.fill(deck, 4);
+				opponent.hand.fill(deck, 4);
+				break;
+			case Card.SPADES:
+				System.out.print("Rolling d6 to increase speed... ");
+				r1 = dice[0].roll();
+				System.out.println(r1);
+				baseSp += r1;
+			}
+			break;
+		case 10:
+			System.out.println("Who shall you reset? " + name + " or " + opponent.name + "?");// choose who to reset
+			String choyce = in.next();
+			while (!choyce.equalsIgnoreCase(name) && !choyce.equalsIgnoreCase(opponent.name)) {
+				System.out.println("You must choose one of the two players currently in play!");
+				choyce = in.next();
+			}
+			if (choyce.equalsIgnoreCase(name)) {
+				Player tempPlayer = new Player(pcdeck, deck, dice, hand, in);
+				this.makeEqualTo(tempPlayer);
+			} else {
+				System.out.print("Rolling for hit... ");
+				int roll = dice[0].roll();
+				System.out.println(roll);
+				if (roll*10 > speed) {
+					Player tempPlayer = new Player(pcdeck, deck, dice, opponent.hand, in);
+					opponent.makeEqualTo(tempPlayer);
+				} else {
+					System.out.println("Miss");
+				}
+			}
+			break;
+		}
 		
+	}
+	
+	private void damage( int chupa, Player opponent, Die[] dice, Scanner in ) {
+		if (opponent.shielded) {
+			System.out.println(opponent.name + " blocked the attack!");
+			opponent.shielded = false;
+		} else {
+			if (chupa >= 3 && chupa <= 9) {
+				System.out.print("Rolling for hit... ");
+				int roll = dice[0].roll();
+				System.out.println(roll);
+				if (roll*10 > speed) {
+					System.out.println(opponent.name + " takes " + chupa + " damage");
+					if (opponent.HP > chupa)
+						opponent.HP -= chupa;
+					else
+						opponent.HP = 0;
+				} else {
+					System.out.println("Miss");
+				}
+			} else if (chupa == Card.ACE) {
+				System.out.print("Rolling 2d6 for damage... ");
+				int r1 = dice[0].roll();
+				int r2 = dice[1].roll();
+				System.out.println(r1 + " " + r2);
+				if (opponent.HP > (r1+r2) )
+					opponent.HP -= (r1 + r2);
+				else
+					opponent.HP = 0;
+			}
+		}
 	}
 	
 	public void effect( Player opponent, Scanner in ) {
