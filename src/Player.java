@@ -171,6 +171,12 @@ public class Player {
 		if (r.discardNeeded) {
 			discard.add(hand.get(r.choice));
 			hand.remove(r.choice);
+			if (deck.isEmpty()) {
+				deck.addAll(discard);
+				discard.clear();
+				deck.shuffle();
+			}
+			hand.add(deck.deal());
 		}
 	}
 	
@@ -220,11 +226,13 @@ public class Player {
 				this.HP += drain;
 				break;
 			case Card.HEARTS:
-				for ( Card c : hand ) {
+				Card[] handArray = (Card[]) hand.toArray();
+				for ( Card c : handArray ) {
 					deck.add(c);
 					hand.remove(c);
 				}
-				for ( Card c : opponent.hand ) {
+				handArray = (Card[]) opponent.hand.toArray();
+				for ( Card c : handArray ) {
 					deck.add(c);
 					opponent.hand.remove(c);
 				}

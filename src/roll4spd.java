@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class roll4spd {
 
 	public static void main(String[] args) {
-		System.out.println( "Roll For Speeeeed v0.0" );
+		System.out.println( "Roll For Speeeeed v0.0.1" );
 		System.out.println( "game design: E Henley" );
 		System.out.println( "lead programmer: milan\n" );
 		
