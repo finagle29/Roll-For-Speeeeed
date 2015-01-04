@@ -1,25 +1,24 @@
 import java.util.Random;
 
+class Die {
 
-public class Die {
+	private int sides;
+	private static Random r = new Random();
 
-	int sides;
-	static Random r = new Random();
-	
-	public Die( int n ) {
-		
-		if ( n > 0 )
+	private Die(int n) {
+
+		if (n > 0)
 			sides = n;
 		else
-			throw new IllegalArgumentException( "Dice must have at least one side!" );
+			throw new IllegalArgumentException("Dice must have at least one side!");
 	}
-	
+
 	public Die() {
-		this( 6 );
+		this(6);
 	}
-	
-	public int roll() {
+
+	int roll() {
 		return 1 + r.nextInt(sides);
 	}
-	
+
 }

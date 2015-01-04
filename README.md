@@ -33,7 +33,7 @@ discard played card(s)
 
 effect play:
 hearts: heal 4, 6
-diamonds: each player chooses one card to give to opponent, player chooses two to give to opponent and chooses two from opponent
+diamonds: players choose one card to take from opponent's hand, player chooses two to give to opponent and chooses two from opponent
 clubs: deal 4, 6 (shield breaker)
 spades: discard 1 and draw 1, draw 1 and discard 1
 

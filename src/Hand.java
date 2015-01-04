@@ -1,25 +1,28 @@
 import java.util.ArrayList;
 
-public class Hand extends Deck {
+class Hand extends Deck {
 
-	public Hand( int size ) {
-		new ArrayList<Card>( size );
+	private static final long serialVersionUID = 8263442648262071244L;
+
+	Hand(int size) {
+		new ArrayList<Card>(size);
 	}
-	
+
+	@Override
 	public void display() {
-		System.out.print( this.toString() );
+		System.out.print(this.toString());
 	}
-	
+
+	@Override
 	public String toString() {
 		String s = "";
-		for ( Card c : this ) {
+		for (Card c : this)
 			s = s + c.toString() + "\t";
-		}
 		return s;
 	}
-	
-	public void fill( Deck d, int numCards ) {
-		while( numCards > 0 ) {
+
+	void fill(Deck d, int numCards) {
+		while (numCards > 0) {
 			this.add(d.deal());
 			numCards--;
 		}

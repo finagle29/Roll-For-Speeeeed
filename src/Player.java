@@ -2,160 +2,173 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-public class Player {
+class Player {
 
-	public String name;
-	public Card pc;
-	public Hand hand;
-	public int HP;
-	public int maxHP = 0;
-	public int baseSp = 0;
-	public int turnSp = 0;
-	public int speed = 0;
-	public boolean shielded = false;
-	
+	private String name;
+	private Card pc;
+	private Hand hand;
+	int HP;
+	private int maxHP = 0;
+	private int baseSp = 0;
+	private int turnSp = 0;
+	int speed = 0;
+	private boolean shielded = false;
+	private int handSize;
+
 	/**
 	 * This constructor is used for initial setup
-	 * @param name the name of the player
-	 * @param p the pcDeck used for the game
-	 * @param d the Deck used for the game
-	 * @param dice the Die array used for the game
-	 * @param in the Scanner used for the game
+	 * 
+	 * @param name
+	 *            the name of the player
+	 * @param p
+	 *            the pcDeck used for the game
+	 * @param d
+	 *            the Deck used for the game
+	 * @param dice
+	 *            the Die array used for the game
+	 * @param in
+	 *            the Scanner used for the game
 	 */
-	public Player( String name, pcDeck p, Deck d , Die[] dice, Scanner in ) {
+	Player(String name, pcDeck p, Deck d, Die[] dice, Scanner in) {
 		this.name = name;
 		hand = new Hand(0);
 		hand.add(p.deal());
 		hand.add(p.deal());
-		
+
 		System.out.println("Choose a player card (1 or 2): ");
 		hand.display();
 		int i = in.nextInt();
-		while (i!=1 && i!=2) {
+		while ((i != 1) && (i != 2)) {
 			System.out.println("Please choose card 1 or card 2 as your player card.");
 			hand.display();
 			i = in.nextInt();
 		}
-		pc = hand.get(i-1);
+		pc = hand.get(i - 1);
 		hand.clear();
-		hand.fill(d, (pc.suit==3)?5:3);
-		if (pc.suit == 0) {
+		hand.fill(d, (pc.suit == 3) ? 5 : 3);
+		if (pc.suit == Card.CLUBS) {
 			Set<Card> s = new HashSet<Card>(hand);
-			switch (hand.size()-s.size()) {
+			switch (hand.size() - s.size()) {
 			case 1:
 				hand.add(d.deal());
 				break;
 			case 2:
-				hand.fill(d,3);
+				hand.fill(d, 3);
 				break;
 			}
 		}
-		roll4baseSp(dice, in);
-		roll4hp(dice, in);
-		
+		handSize = hand.size();
+		this.roll4baseSp(dice, in);
+		this.roll4hp(dice, in);
+
 	}
-	
+
 	/**
 	 * This constructor is used for resets.
-	 * @param p the pcDeck used for the game
-	 * @param d the Deck used for the game 
-	 * @param dice the Die array used for the game
-	 * @param h the player's current hand
-	 * @param in the Scanner used for the game 
+	 * 
+	 * @param p
+	 *            the pcDeck used for the game
+	 * @param d
+	 *            the Deck used for the game
+	 * @param dice
+	 *            the Die array used for the game
+	 * @param h
+	 *            the player's current hand
+	 * @param in
+	 *            the Scanner used for the game
 	 */
-	public Player( pcDeck p, Deck d, Die[] dice, Hand h, Scanner in ) {
+	private Player(pcDeck p, Deck d, Die[] dice, Hand h, Scanner in) {
 		hand.add(p.deal());
 		hand.add(p.deal());
-		
+
 		System.out.println("Choose a player card (1 or 2): ");
 		hand.display();
 		int i = in.nextInt();
-		while (i!=1 && i!=2) {
+		while ((i != 1) && (i != 2)) {
 			System.out.println("Please choose card 1 or card 2 as your player card.");
 			hand.display();
 			i = in.nextInt();
 		}
-		pc = hand.get(i-1);
+		pc = hand.get(i - 1);
 		hand.clear();
-		if (((pc.suit==3)?5:3) > h.size()) {
-			h.fill(d, 2);
-		}
-		
-		roll4baseSp(dice, in);
-		roll4hp(dice, in);
+		hand.fill(d, (pc.suit == 3) ? 5 : 3);
+		handSize = hand.size();
+		if (handSize > h.size())
+			h.fill(d, handSize - h.size());
+		hand = (Hand) h.clone();
+		this.roll4baseSp(dice, in);
+		this.roll4hp(dice, in);
 	}
-	
-	public void roll4hp( Die[] dice , Scanner in ) {
-		for ( int c = 0; c < ( ( pc.suit == Card.HEARTS ) ? 6 : 5 ); c++ ) {
-			maxHP += 2*dice[c].roll();
-		}
+
+	private void roll4hp(Die[] dice, Scanner in) {
+		for (int c = 0; c < ((pc.suit == Card.HEARTS) ? 6 : 5); c++)
+			maxHP += 2 * dice[c].roll();
 		HP = maxHP;
 		System.out.println("HP: " + HP + "/" + maxHP);
-		if ( pc.value == Card.QUEEN || pc.value == Card.KING ) {
+		if ((pc.value == Card.QUEEN) || (pc.value == Card.KING)) {
 			System.out.println("Would you like to reroll (y/n)?");
 			char ans = in.next().charAt(0);
-			if (ans == 'y' || ans == 'Y') {
+			if ((ans == 'y') || (ans == 'Y')) {
 				maxHP = 0;
-				for ( int c = 0; c < ( ( pc.suit == Card.HEARTS ) ? 6 : 5 ); c++ ) {
-					maxHP += 2*dice[c].roll();
-				}
+				for (int c = 0; c < ((pc.suit == Card.HEARTS) ? 6 : 5); c++)
+					maxHP += 2 * dice[c].roll();
 				HP = maxHP;
 				System.out.println("HP: " + HP + "/" + maxHP);
 			}
 		}
 	}
-	
-	public void roll4baseSp( Die[] dice, Scanner in ) {
+
+	private void roll4baseSp(Die[] dice, Scanner in) {
 		System.out.println("Rolling for speeeeed...");
-		for ( int c = 0; c < ( ( pc.suit == Card.DIAMONDS ) ? 5 : 4 ); c++ ) {
+		for (int c = 0; c < ((pc.suit == Card.DIAMONDS) ? 5 : 4); c++)
 			baseSp += dice[c].roll();
-		}
 		System.out.println("Your current base speed is " + baseSp);
-		if ( pc.value == Card.QUEEN || pc.value == Card.JACK ) {
+		if ((pc.value == Card.QUEEN) || (pc.value == Card.JACK)) {
 			System.out.println("Would you like to reroll (y/n)?");
 			char ans = in.next().charAt(0);
-			if (ans == 'y' || ans == 'Y') {
+			if ((ans == 'y') || (ans == 'Y')) {
 				baseSp = 0;
 				System.out.println("Rolling for speeeeed...");
-				for ( int c = 0; c < ( ( pc.suit == Card.DIAMONDS ) ? 5 : 4 ); c++ ) {
+				for (int c = 0; c < ((pc.suit == Card.DIAMONDS) ? 5 : 4); c++)
 					baseSp += dice[c].roll();
-				}
 				System.out.println("Your current base speed is now " + baseSp);
 			}
 		}
 	}
-	
-	private void makeEqualTo( Player copy ) {
+
+	private void makeEqualTo(Player copy) {
 		pc = copy.pc.clone();
 		hand = (Hand) copy.hand.clone();
 		maxHP = copy.maxHP;
 		baseSp = copy.baseSp;
 	}
-	
-	public void rollForSpeeeeed( Die[] dice ) {
+
+	void rollForSpeeeeed(Die[] dice) {
 		turnSp = 0;
 		System.out.println("Roll for Speeeed!");
-		for ( int c = 0; c < 2; c++ ) {
+		for (int c = 0; c < 2; c++)
 			turnSp += dice[c].roll();
-		}
 		speed = turnSp + baseSp;
 	}
-	
+
+	@Override
 	public String toString() {
-		return this.name + "\t" + this.pc.toString() + "\nHP: " + this.HP + "/" + this.maxHP + "\nspeed: " + this.speed + "\n" + this.hand.toString();
+		return name + "\t" + pc.toString() + "\nHP: " + HP + "/" + maxHP
+				+ "\nspeed: " + speed + "\n" + hand.toString();
 	}
-	
-	public void display() {
+
+	void display() {
 		System.out.println(this.toString());
 	}
-	
-	public void takeTurn( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
+
+	void takeTurn(Player opponent, Die[] dice, Scanner in,
+			pcDeck pcdeck, Deck deck, Deck discard) {
 		returnState r;
 		System.out.println("Your hand:");
 		hand.display();
 		System.out.println("Attack or Effect (a/e)");
 		char c = in.next().charAt(0);
-		while ( c != 'a' && c != 'e' && c != 'A' && c != 'E' ) {
+		while ((c != 'a') && (c != 'e') && (c != 'A') && (c != 'E')) {
 			hand.display();
 			System.out.println("Please choose to either [A]ttack or [E]ffect.");
 			c = in.next().charAt(0);
@@ -163,29 +176,25 @@ public class Player {
 		switch (c) {
 		case 'a':
 		case 'A':
-			r = this.attack( opponent, dice, in, pcdeck, deck, discard );
+			r = this.attack(opponent, dice, in, pcdeck, deck, discard);
 			break;
 		default:
-			r = this.effect( opponent, in );
+			r = this.effect(opponent, in, deck, discard);
 		}
 		if (r.discardNeeded) {
-			discard.add(hand.get(r.choice));
-			hand.remove(r.choice);
-			if (deck.isEmpty()) {
-				deck.addAll(discard);
-				discard.clear();
-				deck.shuffle();
-			}
-			hand.add(deck.deal());
+			this.discard(deck, discard, hand, r.choice);
+			this.replenish(deck, discard, hand);
 		}
 	}
-	
-	private returnState attack( Player opponent, Die[] dice, Scanner in, pcDeck pcdeck, Deck deck, Deck discard ) {
-		this.hand.shuffle();
-		System.out.println(opponent.name + ", choose a card from " + this.name + "'s hand (1-" + this.hand.size() + ")");
+
+	private returnState attack(Player opponent, Die[] dice, Scanner in,
+			pcDeck pcdeck, Deck deck, Deck discard) {
+		hand.shuffle();
+		System.out.println(opponent.name + ", choose a card from " + name
+				+ "'s hand (1-" + hand.size() + ")");
 		int choice = in.nextInt() - 1;
-		while (choice < 0 || choice >= this.hand.size()) {
-			System.out.println("You must choose a valid card index (between 1 and " + this.hand.size() + ")");
+		while ((choice < 0) || (choice >= hand.size())) {
+			System.out.println("You must choose a valid card index (between 1 and " + hand.size() + ")");
 			choice = in.nextInt() - 1;
 		}
 		System.out.println(hand.get(choice).toString());
@@ -195,20 +204,20 @@ public class Player {
 		case 4:
 		case 5:
 		case 7:
-			damage(hand.get(choice).value, opponent, dice, in);
+			this.damage(hand.get(choice).value, opponent, dice, in);
 			break;
 		case 8:
 		case 9:
 			if (pc.value == Card.JACK)
-				damage(Card.ACE, opponent, dice, in);
+				this.damage(Card.ACE, opponent, dice, in);
 			else
-				damage(hand.get(choice).value, opponent, dice, in);
+				this.damage(hand.get(choice).value, opponent, dice, in);
 			break;
 		case 6:
 			if (pc.value == Card.KING)
-				damage(Card.ACE, opponent, dice, in);
+				this.damage(Card.ACE, opponent, dice, in);
 			else
-				damage(hand.get(choice).value, opponent, dice, in);
+				this.damage(hand.get(choice).value, opponent, dice, in);
 			break;
 		case 2:
 			switch (pc.suit) {
@@ -220,25 +229,26 @@ public class Player {
 				int r1 = dice[0].roll();
 				int r2 = dice[1].roll();
 				System.out.println(r1 + " " + r2);
-				int drain = (r1 + r2)/2 + (r1 + r2)%2;
+				int drain = ((r1 + r2) / 2) + ((r1 + r2) % 2);
 				System.out.println(drain + " was drained!");
 				opponent.HP -= drain;
-				this.HP += drain;
+				HP += drain;
 				break;
 			case Card.HEARTS:
 				Card[] handArray = (Card[]) hand.toArray();
-				for ( Card c : handArray ) {
+				for (Card c : handArray) {
 					deck.add(c);
 					hand.remove(c);
 				}
 				handArray = (Card[]) opponent.hand.toArray();
-				for ( Card c : handArray ) {
+				for (Card c : handArray) {
 					deck.add(c);
 					opponent.hand.remove(c);
 				}
 				deck.shuffle();
 				hand.fill(deck, 4);
 				opponent.hand.fill(deck, 4);
+				System.out.println("Both players hands were shuffled into the deck and new 4 card hands were drawn");
 				return new returnState(choice, false);
 			case Card.SPADES:
 				System.out.print("Rolling d6 to increase speed... ");
@@ -248,10 +258,13 @@ public class Player {
 			}
 			break;
 		case 10:
-			System.out.println("Who shall you reset? " + name + " or " + opponent.name + "?");// choose who to reset
+			System.out.println("Who shall you reset? " + name + " or "
+					+ opponent.name + "?");// choose who to reset
 			String choyce = in.next();
-			while (!choyce.equalsIgnoreCase(name) && !choyce.equalsIgnoreCase(opponent.name)) {
-				System.out.println("You must choose one of the two players currently in play!");
+			while (!choyce.equalsIgnoreCase(name)
+					&& !choyce.equalsIgnoreCase(opponent.name)) {
+				System.out
+						.println("You must choose one of the two players currently in play!");
 				choyce = in.next();
 			}
 			if (choyce.equalsIgnoreCase(name)) {
@@ -262,61 +275,289 @@ public class Player {
 				System.out.print("Rolling for hit... ");
 				int roll = dice[0].roll();
 				System.out.println(roll);
-				if (roll*10 > speed) {
-					Player tempPlayer = new Player(pcdeck, deck, dice, opponent.hand, in);
+				if ((roll * 10) > speed) {
+					Player tempPlayer = new Player(pcdeck, deck, dice,
+							opponent.hand, in);
 					opponent.makeEqualTo(tempPlayer);
-				} else {
+				} else
 					System.out.println("Miss");
-				}
 			}
 			break;
 		}
 		return new returnState(choice, true);
 	}
-	
-	private void damage( int chupa, Player opponent, Die[] dice, Scanner in ) {
+
+	private void damage(int chupa, Player opponent, Die[] dice, Scanner in) {
 		if (opponent.shielded) {
 			System.out.println(opponent.name + " blocked the attack!");
 			opponent.shielded = false;
-		} else {
-			if (chupa >= 3 && chupa <= 9) {
-				System.out.print("Rolling for hit... ");
-				int roll = dice[0].roll();
-				System.out.println(roll);
-				if (roll*10 > speed) {
-					System.out.println(opponent.name + " takes " + chupa + " damage");
-					if (opponent.HP > chupa)
-						opponent.HP -= chupa;
-					else
-						opponent.HP = 0;
-				} else {
-					System.out.println("Miss");
+		} else if ((chupa >= 3) && (chupa <= 9)) {
+			System.out.print("Rolling for hit... ");
+			int roll = dice[0].roll();
+			System.out.println(roll);
+			if ((roll * 10) > speed) {
+				System.out.println(opponent.name + " takes " + chupa
+						+ " damage");
+				if (opponent.HP > chupa)
+					opponent.HP -= chupa;
+				else
+					opponent.HP = 0;
+			} else
+				System.out.println("Miss");
+		} else if (chupa == Card.ACE) {
+			System.out.print("Rolling 2d6 for damage... ");
+			int r1 = dice[0].roll();
+			int r2 = dice[1].roll();
+			System.out.println(r1 + " " + r2);
+			if (opponent.HP > (r1 + r2))
+				opponent.HP -= (r1 + r2);
+			else
+				opponent.HP = 0;
+		}
+	}
+
+	private returnState effect(Player opponent, Scanner in, Deck deck,
+			Deck discard) {
+		System.out.println("Choose a card to effect play (1-" + hand.size()
+				+ ")");
+		int choice = in.nextInt() - 1;
+		while ((choice < 0) || (choice >= hand.size())) {
+			System.out
+					.println("You must choose a valid card index (between 1 and "
+							+ hand.size() + ")");
+			choice = in.nextInt() - 1;
+		}
+		Card choice1 = hand.get(choice).clone();
+		this.discard(deck, discard, hand, choice1);
+		Card choice2 = null;
+		System.out.println(choice1.toString());
+		if ((choice1.suit != pc.suit)
+				&& hand.contains(new Card(14, choice1.suit))) {
+			System.out
+					.println("Would you like to effect play another card? (Y/n)");
+			char c = in.next().charAt(0);
+			while ((c != 'y') && (c != 'n') && (c != 'Y') && (c != 'N')) {
+				hand.display();
+				System.out.println("Please answer [Y]es or [n]o");
+				c = in.next().charAt(0);
+			}
+			if ((c == 'Y') || (c == 'y')) {
+				System.out.println("Choose a card to effect play (1-"
+						+ hand.size() + ")");
+				choice = in.nextInt() - 1;
+				while ((choice < 0) || (choice >= hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size() + ")");
+					choice = in.nextInt() - 1;
 				}
-			} else if (chupa == Card.ACE) {
-				System.out.print("Rolling 2d6 for damage... ");
-				int r1 = dice[0].roll();
-				int r2 = dice[1].roll();
-				System.out.println(r1 + " " + r2);
-				if (opponent.HP > (r1+r2) )
-					opponent.HP -= (r1 + r2);
+				choice2 = hand.get(choice).clone();
+				this.discard(deck, discard, hand, choice2);
+			}
+		}
+		this.replenish(deck, discard, hand);
+		int strength = 1 + ((choice1.suit == pc.suit) ? 1 : 0)
+				+ ((choice2 == null) ? 0 : 1);
+		Card discardChoice = null;
+		switch (choice1.suit) {
+		case Card.CLUBS:
+			if (strength == 1) {
+				System.out.println(opponent.name + " takes " + 4 + " damage");
+				if (opponent.HP > 4)
+					opponent.HP -= 4;
+				else
+					opponent.HP = 0;
+			} else {
+				System.out.println(opponent.name + " takes " + 6 + " damage");
+				if (opponent.HP > 6)
+					opponent.HP -= 6;
 				else
 					opponent.HP = 0;
 			}
+			opponent.shielded = false;
+			break;
+		case Card.DIAMONDS:
+			if (strength == 1) {
+				opponent.hand.shuffle();
+				System.out.println(name
+						+ ", choose a card from opponent's hand (1-"
+						+ opponent.hand.size() + ")");
+				choice = in.nextInt() - 1;
+				while ((choice < 0) || (choice >= opponent.hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ opponent.hand.size() + ")");
+					choice = in.nextInt() - 1;
+				}
+				choice2 = opponent.hand.get(choice).clone();
+
+				hand.shuffle();
+				System.out.println(opponent.name
+						+ ", choose a card from opponent's (1-" + hand.size()
+						+ ")");
+				choice = in.nextInt() - 1;
+				while ((choice < 0) || (choice >= hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size() + ")");
+					choice = in.nextInt() - 1;
+				}
+				opponent.hand.add(hand.get(choice));
+				hand.remove(choice);
+				hand.add(choice2);
+				choice2 = null;
+			} else {
+				hand.display();
+				System.out.println("Choose first card to give to opponent (1-"
+						+ hand.size() + ")");
+				int[] choices = { in.nextInt() - 1, 0 };
+				while ((choices[0] < 0) || (choices[0] >= hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size() + ")");
+					choices[0] = in.nextInt() - 1;
+				}
+				System.out.println("Choose second card to give to opponent (1-"
+						+ hand.size() + ")");
+				choices[1] = in.nextInt() - 1;
+				while ((choices[1] < 0) || (choices[1] >= hand.size())
+						|| (choices[1] == choices[0])) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size()
+									+ " and not "
+									+ choices[0]
+									+ " )");
+					choices[1] = in.nextInt() - 1;
+				}
+				Card trade11 = hand.get(choices[0]).clone();
+				Card trade12 = hand.get(choices[1]).clone();
+				hand.remove(trade11);
+				hand.remove(trade12);
+
+				opponent.hand.shuffle();
+				System.out
+						.println("Choose first card to take from opponent (1-"
+								+ opponent.hand.size() + ")");
+				int[] choices2 = { in.nextInt() - 1, 0 };
+				while ((choices2[0] < 0)
+						|| (choices2[0] >= opponent.hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ opponent.hand.size() + ")");
+					choices2[0] = in.nextInt() - 1;
+				}
+				System.out.println("Choose second card to give to opponent (1-"
+						+ opponent.hand.size() + ")");
+				choices2[1] = in.nextInt() - 1;
+				while ((choices2[1] < 0)
+						|| (choices2[1] >= opponent.hand.size())
+						|| (choices2[1] == choices2[0])) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ opponent.hand.size()
+									+ " and not "
+									+ choices2[0] + " )");
+					choices2[1] = in.nextInt() - 1;
+				}
+				Card trade21 = opponent.hand.get(choices2[0]).clone();
+				Card trade22 = opponent.hand.get(choices2[1]).clone();
+				opponent.hand.remove(trade21);
+				opponent.hand.remove(trade22);
+				hand.add(trade21);
+				hand.add(trade22);
+				opponent.hand.add(trade11);
+				opponent.hand.add(trade12);
+			}
+			break;
+		case Card.HEARTS:
+			if (strength == 1) {
+				System.out.println(name + " is healed for " + 4 + " damage");
+				if ((maxHP - HP) > 4)
+					HP += 4;
+				else
+					HP = maxHP;
+			} else {
+				System.out.println(name + " is healed for " + 6 + " damage");
+				if ((maxHP - HP) > 6)
+					HP += 6;
+				else
+					HP = maxHP;
+			}
+			break;
+		case Card.SPADES:
+			if (strength == 1) {
+				hand.display();
+				System.out.println("Choose a card to discard (1-" + hand.size()
+						+ ")");
+				choice = in.nextInt() - 1;
+				while ((choice < 0) || (choice >= hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size() + ")");
+					choice = in.nextInt() - 1;
+				}
+				discardChoice = hand.get(choice).clone();
+				this.discard(deck, discard, hand, discardChoice);
+				this.replenish(deck, discard, hand);
+			} else {
+				this.replenish(deck, discard, hand, true);
+				hand.display();
+				System.out.println("Choose a card to discard (1-" + hand.size()
+						+ ")");
+				choice = in.nextInt() - 1;
+				while ((choice < 0) || (choice >= hand.size())) {
+					System.out
+							.println("You must choose a valid card index (between 1 and "
+									+ hand.size() + ")");
+					choice = in.nextInt() - 1;
+				}
+				discardChoice = hand.get(choice).clone();
+				this.discard(deck, discard, hand, discardChoice);
+			}
+			break;
 		}
-	}
-	
-	private returnState effect( Player opponent, Scanner in ) {
-		return new returnState(0,false); // write code here later
+		return new returnState(0, false);
 	}
 
 	private class returnState {
 		int choice;
 		boolean discardNeeded;
-		
-		returnState( int c, boolean d ) {
+
+		returnState(int c, boolean d) {
 			choice = c;
 			discardNeeded = d;
 		}
-		
+
+	}
+
+	private void discard(Deck deck, Deck discard, Hand h, int choice) {
+		discard.add(h.get(choice));
+		h.remove(choice);
+	}
+
+	private void replenish(Deck deck, Deck discard, Hand h) {
+		if (deck.isEmpty()) {
+			deck.addAll(discard);
+			discard.clear();
+			deck.shuffle();
+		}
+		while (hand.size() < handSize)
+			h.add(deck.deal());
+	}
+
+	private void replenish(Deck deck, Deck discard, Hand h, boolean fooFlag) {
+		if (deck.isEmpty()) {
+			deck.addAll(discard);
+			discard.clear();
+			deck.shuffle();
+		}
+		if (fooFlag)
+			h.add(deck.deal());
+	}
+
+	private void discard(Deck deck, Deck discard, Hand h, Card choice) {
+		discard.add(choice);
+		h.remove(choice);
 	}
 }
