@@ -70,7 +70,7 @@ class Player {
 	 * @param in the Scanner used for the game
 	 */
 	private Player(pcDeck p, Deck d, Die[] dice, Hand h, Scanner in) {
-		super();
+		this();
 		hand.add(p.deal());
 		hand.add(p.deal());
 
