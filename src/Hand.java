@@ -1,18 +1,22 @@
 import java.util.ArrayList;
 
-class Hand extends Deck {
+import javax.swing.JLabel;
 
-	private static final long serialVersionUID = 8263442648262071244L;
+class Hand extends Deck {
 
 	Hand(int size) {
 		new ArrayList<Card>(size);
 	}
 
-	@Override
-	public void display() {
-		System.out.print(this.toString());
-	}
 
+	public void display() {
+		JLabel[] labels = new JLabel[this.size()];
+		for (int i = 0; i<this.size(); i++) {
+			labels[i] = new JLabel(this.get(i).toString());
+		}
+		notifyListeners(labels);
+	}
+	
 	@Override
 	public String toString() {
 		String s = "";

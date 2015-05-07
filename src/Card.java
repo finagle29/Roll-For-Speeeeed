@@ -1,3 +1,4 @@
+
 class Card {
 
 	static final int CLUBS = 0;
@@ -17,7 +18,7 @@ class Card {
 		suit = thisSuit;
 		value = thisValue;
 	}
-
+	
 	private String valueToString() {
 		switch (value) {
 		case 2:
@@ -80,5 +81,7 @@ class Card {
 		} else
 			return false;
 	}
+	
+	
 
 }

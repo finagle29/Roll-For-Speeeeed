@@ -1,11 +1,24 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javax.swing.JLabel;
+
 class Deck extends ArrayList<Card> {
-
-	private static final long serialVersionUID = 8521460286140110101L;
-
+	
+	public ArrayList<gameWindow> observers;
+	
+	public void registerObserver( gameWindow o ) {
+		observers.add(o);
+	}
+	
+	public void notifyListeners( JLabel[] labels ) {
+		for ( gameWindow o : observers ) {
+			((gameWindow) o).notif( labels );
+		}
+	}
+	
 	Deck(boolean isFilled) {
+		observers = new ArrayList<gameWindow>();
 		new ArrayList<Card>(52);
 		if (isFilled)
 			for (int val = 1; val <= 13; val++)
@@ -18,8 +31,8 @@ class Deck extends ArrayList<Card> {
 	}
 
 	Card deal() {
-		Card c = this.get(0);
-		this.remove(0);
+		Card c = get(0);
+		remove(c);
 		return c;
 	}
 
@@ -47,7 +60,11 @@ class Deck extends ArrayList<Card> {
 	}
 
 	public void display() {
-		System.out.println(this.toString());
+		JLabel[] labels = new JLabel[this.size()];
+		for (int i = 0; i<this.size(); i++) {
+			labels[i]= new JLabel(this.get(i).toString());
+		}
+		notifyListeners( labels );
 	}
 
 }
