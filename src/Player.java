@@ -78,6 +78,7 @@ class Player {
 	 *            the Scanner used for the game
 	 */
 	private Player(pcDeck p, Deck d, Die[] dice, Hand h, Scanner in) {
+		this();
 		hand.add(p.deal());
 		hand.add(p.deal());
 
